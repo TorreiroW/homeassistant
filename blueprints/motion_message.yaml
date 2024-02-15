@@ -1,0 +1,42 @@
+blueprint:
+  name: Motion-activated Notification
+  description: Send a notification to a specified device when motion is detected.
+  domain: automation
+  input:
+    motion_entity:
+      name: Motion Sensor
+      description: The motion sensor that triggers the notification.
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    message:
+      name: Notification Message
+      description: The message to send as a notification.
+      default: "Motion detected!"
+      selector:
+        text: {}
+    device:
+      name: Target Device
+      description: The device to which the notification should be sent.
+      selector:
+        device:
+          integration: mobile_app
+
+# If motion is detected within the delay,
+# we restart the script.
+mode: restart
+max_exceeded: silent
+
+trigger:
+  platform: state
+  entity_id: !input motion_entity
+  from: "off"
+  to: "on"
+
+action:
+  - alias: "Send notification"
+    service: notify.mobile_app_{{ device }}
+    data:
+      message: "{{ message }}"
+
